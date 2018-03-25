@@ -6,8 +6,8 @@ var s = 20;
 var uid;
 
 $(".submit").click(function() {
-	console.log("dsdsd");
 	socket.emit("code update", editor.getValue());
+	$("#code .save").width(data.i/data.m*100+"%");
 });
 
 socket.on("execution error", function(err) {
@@ -23,15 +23,19 @@ socket.on("execution error", function(err) {
 	board = data;
 }).on("board update", function(data) {
 	if (!board) return;
-	// console.log(data.i+"/"+data.m);
-	// if (test) { test = false; console.log(data.d); }
+	$(".timer > div").width((1-data.i/(data.m-1))*100+"%");
 	board = fossilDelta.apply(board, data.d);
 	canvas.width = s*board.length;
 	canvas.height = s*board[0].length;
 
+	var scores = {}, totalUnits = 0;
+
 	for (var i = 0; i < board.length; i++) {
 		for (var j = 0; j < board[i].length; j++) {
 			var unit = board[i][j];
+			if (!scores.hasOwnProperty(unit.team)) scores[unit.team] = 0;
+			scores[unit.team]++;
+			totalUnits++;
 			ctx.fillStyle = unit.team == "blank" ? "transparent" : unit.team;
 			ctx.fillRect(s*i,s*j,s,s);
 			if (unit.occupied) {
@@ -44,6 +48,13 @@ socket.on("execution error", function(err) {
 				ctx.arc(s*i+s/2,s*j+s/2,s/4,0,2*Math.PI);
 				ctx.fill();
 			}
+		}
+	}
+
+	for (var team in scores) {
+		if (scores.hasOwnProperty(team)) {
+			console.log(team, scores[team]/totalUnits);
+			$(".coverage ."+team).width(scores[team]/totalUnits*100+"%");
 		}
 	}
 });

@@ -1,4 +1,7 @@
-@pad: 0.4em;
+@pad: 7px;
+@red: red;
+@blue: blue;
+@green: green;
 
 body, input, button {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
@@ -75,9 +78,19 @@ body {
 .bar {
 	height: 10px;
 	font-size: 0;
+	margin-bottom: @pad;
 	> div {
 		height: 100%;
-		width: 40%;
-		background: red;
+		width: 0;
+		background: grey;
+	}
+	.red {
+		background: @red;
+	}
+	.blue {
+		background: @blue;
+	}
+	.green {
+		background: @green;
 	}
 }
