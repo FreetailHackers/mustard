@@ -5,15 +5,10 @@ var ctx = canvas.getContext("2d");
 var s = 20;
 var uid;
 
-$(".submit").click(function() {
-	socket.emit("code update", editor.getValue());
-	$("#code .save").width(data.i/data.m*100+"%");
-});
-
 socket.on("execution error", function(err) {
-	// console.error(err);
+	log(err);
 }).on("code suspended", function(runtime) {
-	// console.error("code suspended");
+	log("code has been suspended (too many errors)");
 }).on("game restart", function(data) {
 	// console.log(data);
 	uid = data.uid;
@@ -21,9 +16,10 @@ socket.on("execution error", function(err) {
 	// console.log(data);
 }).on("board reset", function(data) {
 	board = data;
+	$(".board").addClass("loaded");
 }).on("board update", function(data) {
 	if (!board) return;
-	$(".timer > div").width((1-data.i/(data.m-1))*100+"%");
+	$(".timer > div").width((1-(data.i-1)/(data.m-1))*100+"%");
 	board = fossilDelta.apply(board, data.d);
 	canvas.width = s*board.length;
 	canvas.height = s*board[0].length;
@@ -53,7 +49,6 @@ socket.on("execution error", function(err) {
 
 	for (var team in scores) {
 		if (scores.hasOwnProperty(team)) {
-			console.log(team, scores[team]/totalUnits);
 			$(".coverage ."+team).width(scores[team]/totalUnits*100+"%");
 		}
 	}
@@ -61,5 +56,75 @@ socket.on("execution error", function(err) {
 
 var editor = CodeMirror.fromTextArea($("#code .editor textarea")[0], {
 	mode:  "javascript",
-	lineNumbers: true
+	lineNumbers: true,
+	gutters: ["CodeMirror-lint-markers"],
+	lint: true
 });
+
+if (Storage && localStorage.getItem("code")) editor.setValue(localStorage.getItem("code"));
+
+editor.setOption("extraKeys", {
+	"Ctrl-E": function() {
+		$(".submit").click();
+		return false;
+	},
+	"Ctrl-Enter": function() {
+		$(".run").click();
+	}
+});
+
+editor.on("change", function() {
+	$("#code .save").text("unsaved");
+});
+
+// editor.setOption("theme", "blackboard");
+
+$(window).keypress(function(e) {
+	if (e.ctrlKey || e.metaKey) {
+		if (e.which == 69) {
+			$(".submit").click();
+			e.preventDefault();
+		} else if (e.which == 13) {
+			$(".run").click();
+			e.preventDefault();
+		}
+	}
+});
+
+$(".submit").click(function() {
+	socket.emit("code update", editor.getValue());
+	$("#code .save").text("saved");
+	localStorage.setItem("code", editor.getValue());
+});
+
+$(".run").click(function() {
+	try {
+		eval(editor.getValue());
+		var result = step({
+			x: 0,//unit.x,
+			y: 0//unit.y
+		}, board);
+		log(result);
+	} catch(e) {
+		log(e.message+" on line "+e.lineNumber);
+		doc.addLineClass(e.lineNumber, "background", "error");
+	}
+});
+
+var consoleEl = $("#code .console");
+function log(message) {
+	if (typeof message == "object") message = JSON.stringify(message, null, 2);
+	var latest = consoleEl.children().last();
+	console.log(message == latest.find("pre").text());
+	if (message == latest.find("pre").text()) {
+		var counter = latest.find(".repeat"),
+			count = parseInt(counter.text() || 0);
+		console.log(count);
+		counter.text(count+1);
+	} else {
+		consoleEl.append($("<div><div class=repeat /><pre>").find("pre").text(message).parent()).scrollTop(9999);
+		if (consoleEl.children().length > 30) consoleEl.children().first().remove();
+	}
+}
+
+log("ready");

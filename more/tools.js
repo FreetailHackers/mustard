@@ -13,7 +13,7 @@ function evaluateCode(board, player, index) {
 		var timer = setTimeout(function() {
 			console.log("wtf");
 			throw "code timed out";
-		}, 40);
+		}, 50);
 		var result = player.vm.run(code);
 		clearTimeout(timer);
 		// result = await (new Promise(function(resolve, reject) {

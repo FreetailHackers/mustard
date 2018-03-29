@@ -48,7 +48,7 @@ function clean() {
 function updateCode(uid, code) {
 	var player = get(uid);
 	player.vm = newVM();
-	player.code = code+codeTemplate;
+	player.code = code+"\n/**/\n"+codeTemplate; // combats against commenting out the rest
 	// in case there are suspensions, give another chance
 	if (player.failures > failureSuspension) player.failures--;
 }

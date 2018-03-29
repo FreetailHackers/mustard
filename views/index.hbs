@@ -1,8 +1,8 @@
 <div id="code">
 	<div class="status">
 		<div class="save">unsaved</div>
-		<button class="submit">Submit</button>
-		<button class="run">Run locally</button>
+		<button class="submit" title="Ctrl-E">Submit</button>
+		<button class="run" title="Ctrl-Enter">Run locally</button>
 	</div>
 	<div class="editor"><textarea id="" cols="30" rows="10">function step(player, board) {
   return {
@@ -13,8 +13,11 @@
 	<div class="console"></div>
 </div>
 <div id="state">
-	<div class="board"><canvas id="board"></canvas></div>
 	<div class="timer bar"><div></div></div>
+	<div class="board">
+		<div class="status">waiting on game start...</div>
+		<canvas id="board"></canvas>
+	</div>
 	<div class="coverage bar">
 		<div class="red"></div>
 		<div class="green"></div>
@@ -26,10 +29,19 @@
 </div>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.36.0/codemirror.css">
+<link rel="stylesheet" href="https://codemirror.net/addon/lint/lint.css">
+<link rel="stylesheet" href="https://codemirror.net/theme/blackboard.css">
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fossil-delta@1.0.2/fossil-delta.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.36.0/codemirror.js"></script>
 <script src="https://codemirror.net/mode/javascript/javascript.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jshint/2.9.5/jshint.min.js"></script>
+<script src="https://codemirror.net/addon/lint/lint.js"></script>
+<script src="https://codemirror.net/addon/lint/javascript-lint.js"></script>
+<script src="http://codemirror.net/addon/runmode/runmode.js"></script>
+
 <script src="/script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>

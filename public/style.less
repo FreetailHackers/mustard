@@ -3,7 +3,7 @@
 @blue: blue;
 @green: green;
 
-body, input, button {
+body, input, button, .CodeMirror-lint-tooltip {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	background: white;
 	color: black;
@@ -41,6 +41,26 @@ body {
 	}
 }
 
+.bar {
+	height: 10px;
+	font-size: 0;
+	margin-bottom: @pad;
+	> div {
+		height: 100%;
+		width: 0;
+		background: grey;
+	}
+	.red {
+		background: @red;
+	}
+	.blue {
+		background: @blue;
+	}
+	.green {
+		background: @green;
+	}
+}
+
 #code {
 	.status {
 		.save {
@@ -59,12 +79,48 @@ body {
 		}
 	}
 	.console {
+		display: block;
+		padding: @pad;
 		height: 300px;
+		background: #444;
+		color: white;
+		overflow-y: scroll;
+		overflow-x: auto;
+		.repeat {
+			float: right;
+			font-size: 0.8em;
+		}
+		pre {
+			margin: 0;
+			padding-bottom: @pad;
+		}
 	}
 }
 
+.CodeMirror-lint-tooltip {
+	display: block;
+	flex: auto;
+	height: auto;
+}
+
 #state {
+	.timer.bar {
+		height: 2px;
+		transition: width 0.05s ease-out;
+	}
 	.board {
+		position: relative;
+		.status {
+			position: absolute;
+			top: 50%;
+			left: 0;
+			right: 0;
+			text-align: center;
+			transform: translateY(-50%);
+		}
+		&.loaded .status {
+			display: none;
+		}
 		canvas {
 			max-width: 100%;
 		}
@@ -72,25 +128,5 @@ body {
 	.documentation {
 		flex-grow: 1;
 		overflow-y: scroll;
-	}
-}
-
-.bar {
-	height: 10px;
-	font-size: 0;
-	margin-bottom: @pad;
-	> div {
-		height: 100%;
-		width: 0;
-		background: grey;
-	}
-	.red {
-		background: @red;
-	}
-	.blue {
-		background: @blue;
-	}
-	.green {
-		background: @green;
 	}
 }
