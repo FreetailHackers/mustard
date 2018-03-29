@@ -34,8 +34,9 @@ function reset() {
 
 	// seed initial units
 	var totalSpace = process.env.BOARD_WIDTH * process.env.BOARD_HEIGHT;
-	var initUnits = totalSpace*process.env.BOARD_INIT_UTILIZATION;
-	var unitsPerUser = initUnits/players.count();
+	var initUnits = 3;
+	var unitsPerUser = (initUnits/(Math.max(1, players.count())))|0;
+	console.log("players.count()", players.count());
 	var count = 0;
 	players.each(function(player, uid) {
 		player.team = teams[count % teams.length];
@@ -58,6 +59,7 @@ function reset() {
 				y: y
 			});
 		}
+		console.log("length of players array in reset: ", player.units.length);
 		player.playing = true;
 		player.tell("game restart", {
 			team: player.team,
@@ -73,12 +75,26 @@ function tick(callback) {
 
 	queue = shuffle(queue);
 	for (var i = 0; i < queue.length; i++) {
+		var taken1 = 0;
+		for (var x = 0; x < board.length; x++) {
+			for (var j = 0; j < board[i].length; j++) {
+				var unit = board[x][j];
+				if (unit.occupied) 
+					taken1++;
+			}
+		}
+		
+		console.log("real # of spots taken before", taken1)
+
 		var move = queue[i];
 		var player = players.get(move.player);
 		var unit = player.units[move.unit];
 		if (!unit) continue;
 		var prev = board[move.prev.x][move.prev.y];
 		var next = board[move.next.x][move.next.y];
+
+		
+
 		if (!next.occupied) {
 			// not used, no conflict, easy
 			prev.occupied = false;
@@ -100,13 +116,29 @@ function tick(callback) {
 			next.unit = move.unit;
 			unit.x = move.next.x;
 			unit.y = move.next.y;
+
 		} else {
 			// invalid move
 			console.log(next);
+			console.log("unit's information:", players.get(next.player).units[next.unit])
 		}
+
+		var taken2 = 0;
+
+		for (var x = 0; x < board.length; x++) {
+			for (var j = 0; j < board[i].length; j++) {
+				var unit = board[x][j];
+				if (unit.occupied) 
+					taken2++;
+			}
+		}
+		console.log("real # of spots taken after", taken2)
+
+
 	}
 
 	// calculate next round of moves
+
 	queue = [];
 	players.each(function(player) {
 		if (!player.playing) return;
@@ -123,7 +155,9 @@ function tick(callback) {
 				}
 			}
 		}
+		console.log("player units length in tick: ", player.units.length);
 	});
+	
 
 	gameIterations++;
 	console.log(gameIterations);
@@ -137,6 +171,7 @@ function tick(callback) {
 			d: fossilDelta.create(prevBoard, board)
 		});
 	}
+	//console.log(JSON.stringify(board));
 }
 
 function getCompleteState() {
