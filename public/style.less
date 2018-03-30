@@ -55,7 +55,6 @@ main {
 		flex: 1;
 		flex-direction: column;
 		> div {
-			display: flex;
 			margin-top: @pad;
 			padding: 0 @pad;
 		}
@@ -70,6 +69,7 @@ main {
 		width: 0;
 		background: @white;
 		transition: width @steplength linear;
+		display: inline-block;
 	}
 	&.noani > div {
 		transition: none;

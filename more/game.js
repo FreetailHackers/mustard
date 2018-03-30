@@ -78,7 +78,7 @@ function tick(callback) {
 		var move = queue[i];
 		var player = players.get(move.player);
 		var unit = player.units[move.unit];
-		if (!unit) continue;
+		// if (!unit) continue;
 		var prev = board[move.prev.x][move.prev.y];
 		var next = board[move.next.x][move.next.y];
 		if (!next.occupied) {

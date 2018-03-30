@@ -99,6 +99,14 @@ function draw(todraw) {
 	}
 }
 
+var board = $("#board");
+board.mousemove(function(e) {
+	var parentOffset = $(this).parent().offset();
+	var relX = e.pageX - parentOffset.left;
+	var relY = e.pageY - parentOffset.top;
+	log(relX+" "+relY);
+});
+
 var editor = CodeMirror.fromTextArea($("#code .editor textarea")[0], {
 	mode:  "javascript",
 	lineNumbers: true,
@@ -174,6 +182,18 @@ $(".run").click(function() {
 	}
 	console.log = oldLog;
 });
+
+function validateMove(move, unit) {
+	if (!move) return "invalid";
+	if (typeof move !== "object") return "not an object";
+	if (move === null) return "is null";
+	if ((typeof move.x == "undefined") || (typeof move.y == "undefined")) return "does not have x and y";
+	if (move.x !== parseInt(move.x, 10) || move.x !== parseInt(move.x, 10)) return "x and y are not integers";
+	if (Math.abs(move.x - unit.x) > 1 || Math.abs(move.y - unit.y) > 1) return "tries to move too far";
+	if (move.x >= process.env.BOARD_WIDTH || move.y >= process.env.BOARD_HEIGHT) return "moves outside of board";
+	if (move.x < 0 || move.y < 0) return "moves outside of board";
+	return false;
+}
 
 var consoleEl = $("#code .console .content");
 function log(message, cl) {
