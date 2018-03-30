@@ -3,7 +3,7 @@ var players = require("./players");
 var tools = require("./tools");
 
 var io = false;
-var stepSize = 500; // ms
+var stepSize = process.env.STEP_SIZE_MS;
 
 function userConnected(socket) {
 	var uid = players.add(socket);

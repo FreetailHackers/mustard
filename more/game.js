@@ -1,6 +1,5 @@
 var players = require("./players");
 var tools = require("./tools");
-var fossilDelta = require("fossil-delta");
 var shuffle = require("shuffle-array");
 
 var board = [];
@@ -13,7 +12,7 @@ var whoBeats = {
 };
 var queue = [];
 
-var failureSuspension = 20;
+var failureSuspension = process.env.FAILURE_SUSPENSION;
 
 function reset() {
 	// remove now-offline players from previous rounds
@@ -70,6 +69,10 @@ function reset() {
 
 function tick(callback) {
 	var prevBoard = JSON.parse(JSON.stringify(board));
+	var changes = {
+		o: [],
+		n: [],
+	};
 
 	queue = shuffle(queue);
 	for (var i = 0; i < queue.length; i++) {
@@ -88,6 +91,16 @@ function tick(callback) {
 			next.unit = move.unit;
 			unit.x = move.next.x;
 			unit.y = move.next.y;
+			changes.n.push({
+				x: move.prev.x,
+				y: move.prev.y
+			});
+			changes.o.push({
+				x: move.next.x,
+				y: move.next.y,
+				p: move.player,
+				t: player.team
+			});
 		} else if (player.team == whoBeats[next.team]) {
 			// this one beats the previous, make move
 			var elimPlayer = players.get(next.player);
@@ -100,9 +113,19 @@ function tick(callback) {
 			next.unit = move.unit;
 			unit.x = move.next.x;
 			unit.y = move.next.y;
+			changes.n.push({
+				x: move.prev.x,
+				y: move.prev.y
+			});
+			changes.o.push({
+				x: move.next.x,
+				y: move.next.y,
+				p: move.player,
+				t: player.team
+			});
 		} else {
 			// invalid move
-			console.log(next);
+			// console.log(next);
 		}
 	}
 
@@ -111,11 +134,11 @@ function tick(callback) {
 	players.each(function(player) {
 		if (!player.playing) return;
 		for (var i = 0; i < player.units.length; i++) {
-			if (!player.units[i].present || !player.code) continue;
+			if (!player.units[i].present || !player.code || player.failures > failureSuspension) continue;
 			var result = tools.evaluateCode(board, player, i);
 			if (typeof result === "object") {
 				queue.push(result);
-			} else if (typeof result === "string") {
+			} else if (typeof result === "string" && result != "result moves outside of board") {
 				player.tell("execution error", result);
 				player.failures++;
 				if (player.failures >= failureSuspension) {
@@ -134,7 +157,7 @@ function tick(callback) {
 		callback(false, {
 			i: gameIterations,
 			m: process.env.GAME_ITERATIONS,
-			d: fossilDelta.create(prevBoard, board)
+			d: changes
 		});
 	}
 }

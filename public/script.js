@@ -4,11 +4,25 @@ var canvas = document.getElementById("board");
 var ctx = canvas.getContext("2d");
 var s = 20;
 var uid;
+var colors = {
+	blue: "#2f52a7",
+	green: "#2f9fa7",
+	red: "#a72f2f",
+	dark: "#263238",
+	white: "#e9eded"
+};
 
-socket.on("execution error", function(err) {
-	log(err);
+socket.on("connect", function() {
+	log("connected to server, waiting for data");
+	$("header .status").text("connected");
+}).on("disconnect", function() {
+	$(".board").addClass("waiting");
+	$("header .status").text("disconnected");
+	log("lost connection to server", "error");
+}).on("execution error", function(err) {
+	log(err, "error");
 }).on("code suspended", function(runtime) {
-	log("code has been suspended (too many errors)");
+	log("code has been suspended (too many errors)", "error");
 }).on("game restart", function(data) {
 	// console.log(data);
 	uid = data.uid;
@@ -16,15 +30,28 @@ socket.on("execution error", function(err) {
 	// console.log(data);
 }).on("board reset", function(data) {
 	board = data;
-	$(".board").addClass("loaded");
+	$(".timer > div").width("100%").addClass("noani")[0].offsetHeight;
+	$(".timer > div").removeClass("noani");
+	$(".board").removeClass("waiting");
 }).on("board update", function(data) {
 	if (!board) return;
 	$(".timer > div").width((1-(data.i-1)/(data.m-1))*100+"%");
-	board = fossilDelta.apply(board, data.d);
+	for (var i = 0; i < data.d.n.length; i++) {
+		var item = data.d.n[i];
+		board[item.x][item.y].occupied = false;
+		board[item.x][item.y].player = "";
+	}
+	for (var i = 0; i < data.d.o.length; i++) {
+		var item = data.d.o[i];
+		board[item.x][item.y].occupied = true;
+		board[item.x][item.y].player = item.p;
+		board[item.x][item.y].team = item.t;
+	}
+
 	canvas.width = s*board.length;
 	canvas.height = s*board[0].length;
 
-	var scores = {}, totalUnits = 0;
+	var scores = { red: 0, blue: 0, green: 0 }, totalUnits = 0;
 
 	for (var i = 0; i < board.length; i++) {
 		for (var j = 0; j < board[i].length; j++) {
@@ -32,24 +59,33 @@ socket.on("execution error", function(err) {
 			if (!scores.hasOwnProperty(unit.team)) scores[unit.team] = 0;
 			scores[unit.team]++;
 			totalUnits++;
-			ctx.fillStyle = unit.team == "blank" ? "transparent" : unit.team;
+			ctx.fillStyle = unit.team == "blank" ? "transparent" : colors[unit.team];
+			ctx.fillRect(s*i,s*j,s,s);
+			ctx.fillStyle = "rgba(38, 50, 56, 0.8)";
 			ctx.fillRect(s*i,s*j,s,s);
 			if (unit.occupied) {
-				if (unit.player == uid) {
-					ctx.fillStyle = "white";
-					ctx.fillRect(s*i+2,s*j+2,s-4,s-4);
-				}
-				ctx.fillStyle = "black";
+				// someone is here
+				ctx.fillStyle = colors[unit.team];
 				ctx.beginPath();
-				ctx.arc(s*i+s/2,s*j+s/2,s/4,0,2*Math.PI);
+				ctx.arc(s*i+s/2,s*j+s/2,s/3,0,2*Math.PI);
 				ctx.fill();
+				// it's the player
+				if (unit.player == uid) {
+					ctx.fillStyle = "rgba(255,255,255,0.6)";
+					ctx.beginPath();
+					ctx.arc(s*i+s/2,s*j+s/2,s/4-2,0,2*Math.PI);
+					ctx.fill();
+				}
 			}
 		}
 	}
 
+	var percent;
 	for (var team in scores) {
 		if (scores.hasOwnProperty(team)) {
-			$(".coverage ."+team).width(scores[team]/totalUnits*100+"%");
+			percent = scores[team]/totalUnits*100;
+			$(".coverage ."+team).width(percent+"%")
+				.html(Math.round(percent*10)/10+"%&nbsp;");
 		}
 	}
 });
@@ -74,10 +110,10 @@ editor.setOption("extraKeys", {
 });
 
 editor.on("change", function() {
-	$("#code .save").text("unsaved");
+	$(".submit").text("Save");
 });
 
-// editor.setOption("theme", "blackboard");
+editor.setOption("theme", "material");
 
 $(window).keypress(function(e) {
 	if (e.ctrlKey || e.metaKey) {
@@ -93,7 +129,7 @@ $(window).keypress(function(e) {
 
 $(".submit").click(function() {
 	socket.emit("code update", editor.getValue());
-	$("#code .save").text("saved");
+	$(".submit").text("Saved");
 	localStorage.setItem("code", editor.getValue());
 });
 
@@ -106,25 +142,35 @@ $(".run").click(function() {
 		}, board);
 		log(result);
 	} catch(e) {
-		log(e.message+" on line "+e.lineNumber);
+		log(e.message+" on line "+e.lineNumber, "error");
 		doc.addLineClass(e.lineNumber, "background", "error");
 	}
 });
 
-var consoleEl = $("#code .console");
-function log(message) {
+var consoleEl = $("#code .console .content");
+function log(message, cl) {
+	cl = cl || "";
 	if (typeof message == "object") message = JSON.stringify(message, null, 2);
 	var latest = consoleEl.children().last();
 	console.log(message == latest.find("pre").text());
 	if (message == latest.find("pre").text()) {
 		var counter = latest.find(".repeat"),
-			count = parseInt(counter.text() || 0);
+			count = parseInt(counter.text() || 1);
 		console.log(count);
 		counter.text(count+1);
 	} else {
-		consoleEl.append($("<div><div class=repeat /><pre>").find("pre").text(message).parent()).scrollTop(9999);
+		consoleEl.append($("<div><div class=repeat /><pre>").find("pre").addClass(cl).text(message).parent()).scrollTop(9999);
 		if (consoleEl.children().length > 30) consoleEl.children().first().remove();
 	}
 }
 
-log("ready");
+$("#code .console").resizable({ 
+	handleSelector: ".resize",
+	resizeWidth: false,
+	resizeHeightFrom: "top",
+	onDrag: function(e, el, w, height) {
+		el.find(".content").height((height-10-7*2)+"px");
+	}
+});
+
+log("application ready");

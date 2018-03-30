@@ -10,12 +10,12 @@ function evaluateCode(board, player, index) {
 		}));
 		// TODO: sometimes code times out and halts the entire program
 		// the attempt below does not fix that
-		var timer = setTimeout(function() {
-			console.log("wtf");
-			throw "code timed out";
-		}, 50);
+		// var timer = setTimeout(function() {
+		// 	console.log("wtf");
+		// 	throw "code timed out";
+		// }, 500);
 		var result = player.vm.run(code);
-		clearTimeout(timer);
+		// clearTimeout(timer);
 		// result = await (new Promise(function(resolve, reject) {
 		// 	var timer = setTimeout(function() {
 		// 		console.log("wtf");

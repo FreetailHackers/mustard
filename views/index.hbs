@@ -1,40 +1,50 @@
-<div id="code">
-	<div class="status">
-		<div class="save">unsaved</div>
-		<button class="submit" title="Ctrl-E">Submit</button>
+<header>
+	<div class="left">
+		<button class="submit" title="Ctrl-E">Save</button>
 		<button class="run" title="Ctrl-Enter">Run locally</button>
 	</div>
-	<div class="editor"><textarea id="" cols="30" rows="10">function step(player, board) {
-  return {
-    x: player.x + 1,
-    y: player.y + 1
-  };
-}</textarea></div>
-	<div class="console"></div>
-</div>
-<div id="state">
-	<div class="timer bar"><div></div></div>
-	<div class="board">
-		<div class="status">waiting on game start...</div>
-		<canvas id="board"></canvas>
+	<div class="center"></div>
+	<div class="right">
+		<div class="status">connecting</div>
 	</div>
-	<div class="coverage bar">
-		<div class="red"></div>
-		<div class="green"></div>
-		<div class="blue"></div>
+</header>
+<main>
+	<div id="code">
+		<div class="editor"><textarea id="" cols="30" rows="10">function step(player, board) {
+		return {
+			x: player.x + 1,
+			y: player.y + 1
+		};
+	}</textarea></div>
+		<div class="console">
+			<div class="resize"></div>
+			<div class="content"></div>
+		</div>
 	</div>
-	<div class="documentation">
-		Some documentation about how code can be used and stuff.
+	<div id="state">
+		<div class="timer bar"><div></div></div>
+		<div class="board waiting">
+			<div class="status">waiting on board state</div>
+			<canvas id="board"></canvas>
+		</div>
+		<div class="coverage bar">
+			<div class="red"></div>
+			<div class="green"></div>
+			<div class="blue"></div>
+		</div>
+		<div class="documentation">
+			Some documentation about how code can be used and stuff.
+		</div>
 	</div>
-</div>
+</main>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.36.0/codemirror.css">
 <link rel="stylesheet" href="https://codemirror.net/addon/lint/lint.css">
-<link rel="stylesheet" href="https://codemirror.net/theme/blackboard.css">
+<link rel="stylesheet" href="https://codemirror.net/theme/material.css">
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/fossil-delta@1.0.2/fossil-delta.min.js"></script>
+<script src="https://rawgit.com/RickStrahl/jquery-resizable/master/src/jquery-resizable.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.36.0/codemirror.js"></script>
 <script src="https://codemirror.net/mode/javascript/javascript.js"></script>
