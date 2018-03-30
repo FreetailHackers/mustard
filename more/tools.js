@@ -1,4 +1,4 @@
-function evaluateCode(board, player, index) {
+async function evaluateCode(board, player, index) {
 	var unit = player.units[index];
 	try {
 		var code = player.code.replace("PAYLOAD", JSON.stringify({
@@ -8,22 +8,14 @@ function evaluateCode(board, player, index) {
 			},
 			board: board
 		}));
-		// TODO: sometimes code times out and halts the entire program
-		// the attempt below does not fix that
-		// var timer = setTimeout(function() {
-		// 	console.log("wtf");
-		// 	throw "code timed out";
-		// }, 500);
-		var result = player.vm.run(code);
-		// clearTimeout(timer);
-		// result = await (new Promise(function(resolve, reject) {
-		// 	var timer = setTimeout(function() {
-		// 		console.log("wtf");
-		// 		reject();
-		// 	}, 40);
-		// 	resolve(player.vm.run(code));
-		// 	clearTimeout(timer);
-		// }));
+		var result = await (new Promise(function(resolve, reject) {
+			var timer = setTimeout(function() {
+				resolve({}); // should be reject
+			}, 50);
+			var result = player.vm.run(code);
+			clearTimeout(timer);
+			resolve(result);
+		}));
 		var resultErr = validateMove(result, unit);
 		if (resultErr === false) {
 			// reset failure count, code worked

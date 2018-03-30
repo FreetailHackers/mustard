@@ -14,7 +14,6 @@ function add(socket) {
 	players[uid] = {
 		uid: uid,
 		tell: function(type, data) {
-			// console.log(type, data);
 			socket.emit(type, data);
 		},
 		units: [],

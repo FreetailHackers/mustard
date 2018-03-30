@@ -18,6 +18,7 @@ socket.on("connect", function() {
 }).on("disconnect", function() {
 	$(".board").addClass("waiting");
 	$("header .status").text("disconnected");
+	$(".submit").text("Save");
 	log("lost connection to server", "error");
 }).on("execution error", function(err) {
 	log(err, "error");
@@ -129,7 +130,7 @@ $(window).keypress(function(e) {
 
 $(".submit").click(function() {
 	socket.emit("code update", editor.getValue());
-	$(".submit").text("Saved");
+	$(".submit").text("Saved!");
 	localStorage.setItem("code", editor.getValue());
 });
 
@@ -152,11 +153,9 @@ function log(message, cl) {
 	cl = cl || "";
 	if (typeof message == "object") message = JSON.stringify(message, null, 2);
 	var latest = consoleEl.children().last();
-	console.log(message == latest.find("pre").text());
 	if (message == latest.find("pre").text()) {
 		var counter = latest.find(".repeat"),
 			count = parseInt(counter.text() || 1);
-		console.log(count);
 		counter.text(count+1);
 	} else {
 		consoleEl.append($("<div><div class=repeat /><pre>").find("pre").addClass(cl).text(message).parent()).scrollTop(9999);

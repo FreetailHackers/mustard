@@ -125,41 +125,43 @@ function tick(callback) {
 			});
 		} else {
 			// invalid move
-			// console.log(next);
 		}
 	}
 
 	// calculate next round of moves
 	queue = [];
+	var tasks = [];
 	players.each(function(player) {
 		if (!player.playing) return;
 		for (var i = 0; i < player.units.length; i++) {
 			if (!player.units[i].present || !player.code || player.failures > failureSuspension) continue;
-			var result = tools.evaluateCode(board, player, i);
-			if (typeof result === "object") {
-				queue.push(result);
-			} else if (typeof result === "string" && result != "result moves outside of board") {
-				player.tell("execution error", result);
-				player.failures++;
-				if (player.failures >= failureSuspension) {
-					player.tell("code suspended");
+			tasks.push(tools.evaluateCode(board, player, i).then(function(result) {
+				if (typeof result === "object") {
+					queue.push(result);
+				} else if (typeof result === "string" && result != "result moves outside of board") {
+					player.tell("execution error", result);
+					player.failures++;
+					if (player.failures >= failureSuspension) {
+						player.tell("code suspended");
+					}
 				}
-			}
+			}));
 		}
 	});
 
-	gameIterations++;
-	console.log(gameIterations);
-	if (gameIterations >= process.env.GAME_ITERATIONS) {
-		reset();
-		callback(true, board);
-	} else {
-		callback(false, {
-			i: gameIterations,
-			m: process.env.GAME_ITERATIONS,
-			d: changes
-		});
-	}
+	Promise.all(tasks).then(function() {
+		gameIterations++;
+		if (gameIterations >= process.env.GAME_ITERATIONS) {
+			reset();
+			callback(true, board);
+		} else {
+			callback(false, {
+				i: gameIterations,
+				m: process.env.GAME_ITERATIONS,
+				d: changes
+			});
+		}
+	});
 }
 
 function getCompleteState() {
