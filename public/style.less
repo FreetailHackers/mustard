@@ -13,8 +13,9 @@ body, input, button, .CodeMirror-lint-tooltip {
 	padding: @pad;
 }
 
-.CodeMirror, pre {
-	//
+.CodeMirror, pre, .info {
+	font-family: 'Courier New', Courier, monospace;
+	font-size: 14px;
 }
 
 input, button {
@@ -195,11 +196,15 @@ main {
 		display: none;
 		cursor: pointer;
 	}
+	.info {
+		display: none;
+		cursor: pointer;
+	}
 	&.paused {
 		.bar {
 			display: none;
 		}
-		.resume {
+		.resume, .info {
 			display: block;
 		}
 	}
