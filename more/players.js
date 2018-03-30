@@ -79,6 +79,10 @@ function getAll() {
 	return players;
 }
 
+function restore(p) {
+	players = p;
+}
+
 module.exports = {
 	add: add,
 	remove: remove,
@@ -88,5 +92,6 @@ module.exports = {
 	each: each,
 	count: count,
 	getAll: getAll,
-	get: get
+	get: get,
+	restore: restore
 }

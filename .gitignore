@@ -1,5 +1,6 @@
-# Rendered LESS file
+# Compressed files from gulp
 public/style.css
+public/min.js
 
 # Environment variables
 .env

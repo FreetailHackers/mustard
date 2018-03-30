@@ -60,8 +60,7 @@ function reset() {
 		player.playing = true;
 		player.tell("game restart", {
 			team: player.team,
-			uid: player.uid,
-			units: player.units
+			uid: player.uid
 		});
 		count++;
 	});

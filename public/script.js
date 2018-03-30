@@ -2,7 +2,7 @@ var socket = io();
 var board, test = true;
 var canvas = document.getElementById("board");
 var ctx = canvas.getContext("2d");
-var s = 20;
+var s = 40;
 var uid;
 var colors = {
 	blue: "#2f52a7",
@@ -11,10 +11,12 @@ var colors = {
 	dark: "#263238",
 	white: "#e9eded"
 };
+var paused = false, frozenBoard;
 
 socket.on("connect", function() {
 	log("connected to server, waiting for data");
 	$("header .status").text("connected");
+	socket.emit("get board");
 }).on("disconnect", function() {
 	$(".board").addClass("waiting");
 	$("header .status").text("disconnected");
@@ -27,6 +29,8 @@ socket.on("connect", function() {
 }).on("game restart", function(data) {
 	// console.log(data);
 	uid = data.uid;
+	$(".coverage > div").removeClass("me");
+	$(".coverage ."+data.team).addClass("me");
 }).on("unit removed", function(data) {
 	// console.log(data);
 }).on("board reset", function(data) {
@@ -49,14 +53,18 @@ socket.on("connect", function() {
 		board[item.x][item.y].team = item.t;
 	}
 
-	canvas.width = s*board.length;
-	canvas.height = s*board[0].length;
+	if (!paused) draw(board);
+});
+
+function draw(todraw) {
+	canvas.width = s*(todraw.length-1);
+	canvas.height = s*(todraw[0].length-1);
 
 	var scores = { red: 0, blue: 0, green: 0 }, totalUnits = 0;
 
-	for (var i = 0; i < board.length; i++) {
-		for (var j = 0; j < board[i].length; j++) {
-			var unit = board[i][j];
+	for (var i = 0; i < todraw.length; i++) {
+		for (var j = 0; j < todraw[i].length; j++) {
+			var unit = todraw[i][j];
 			if (!scores.hasOwnProperty(unit.team)) scores[unit.team] = 0;
 			scores[unit.team]++;
 			totalUnits++;
@@ -74,7 +82,7 @@ socket.on("connect", function() {
 				if (unit.player == uid) {
 					ctx.fillStyle = "rgba(255,255,255,0.6)";
 					ctx.beginPath();
-					ctx.arc(s*i+s/2,s*j+s/2,s/4-2,0,2*Math.PI);
+					ctx.arc(s*i+s/2,s*j+s/2,s/4-s/10,0,2*Math.PI);
 					ctx.fill();
 				}
 			}
@@ -89,7 +97,7 @@ socket.on("connect", function() {
 				.html(Math.round(percent*10)/10+"%&nbsp;");
 		}
 	}
-});
+}
 
 var editor = CodeMirror.fromTextArea($("#code .editor textarea")[0], {
 	mode:  "javascript",
@@ -134,7 +142,25 @@ $(".submit").click(function() {
 	localStorage.setItem("code", editor.getValue());
 });
 
+$(".resume").click(function() {
+	draw(board);
+	$("#state").removeClass("paused");
+	log("board resumed");
+	paused = false;
+});
+
 $(".run").click(function() {
+	if (!paused) {
+		frozenBoard = board;
+		paused = true;
+		log("board frozen");
+		$("#state").addClass("paused");
+	}
+	var oldLog = console.log;
+    console.log = function(message) {
+		log(message);
+        oldLog.apply(console, arguments);
+    };
 	try {
 		eval(editor.getValue());
 		var result = step({
@@ -146,6 +172,7 @@ $(".run").click(function() {
 		log(e.message+" on line "+e.lineNumber, "error");
 		doc.addLineClass(e.lineNumber, "background", "error");
 	}
+	console.log = oldLog;
 });
 
 var consoleEl = $("#code .console .content");

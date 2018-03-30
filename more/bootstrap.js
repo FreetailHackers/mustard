@@ -13,6 +13,8 @@ function userConnected(socket) {
 		players.remove(uid);
 	}).on("code update", function(code) {
 		players.updateCode(uid, code);
+	}).on("get board", function(code) {
+		socket.emit("board reset", game.get());
 	});
 }
 

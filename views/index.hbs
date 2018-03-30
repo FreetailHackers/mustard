@@ -6,7 +6,6 @@
 	<div class="center"></div>
 	<div class="right">
 		<div class="status">connecting</div>
-		<button class="pause">Pause</button>
 	</div>
 </header>
 <main>
@@ -24,6 +23,9 @@
 	</div>
 	<div id="state">
 		<div class="timer bar"><div></div></div>
+		<div class="resume">
+			Board frozen, click to resume
+		</div>
 		<div class="board waiting">
 			<div class="status">waiting on board state</div>
 			<canvas id="board"></canvas>
@@ -39,20 +41,8 @@
 	</div>
 </main>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.36.0/codemirror.css">
-<link rel="stylesheet" href="https://codemirror.net/addon/lint/lint.css">
-<link rel="stylesheet" href="https://codemirror.net/theme/material.css">
+<link rel="stylesheet" href="/more.css">
 
 <script src="/socket.io/socket.io.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://rawgit.com/RickStrahl/jquery-resizable/master/src/jquery-resizable.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.36.0/codemirror.js"></script>
-<script src="https://codemirror.net/mode/javascript/javascript.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jshint/2.9.5/jshint.min.js"></script>
-<script src="https://codemirror.net/addon/lint/lint.js"></script>
-<script src="https://codemirror.net/addon/lint/javascript-lint.js"></script>
-<script src="http://codemirror.net/addon/runmode/runmode.js"></script>
-
+<script src="/min.js"></script>
 <script src="/script.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
