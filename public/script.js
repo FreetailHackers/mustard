@@ -11,7 +11,7 @@ var colors = {
 	dark: "#263238",
 	white: "#e9eded"
 };
-var paused = false, frozenBoard;
+var paused = false, frozenBoard, runOn = {x:0,y:0};
 
 socket.on("connect", function() {
 	log("connected to server, waiting for data");
@@ -99,12 +99,18 @@ function draw(todraw) {
 	}
 }
 
-var board = $("#board");
-board.mousemove(function(e) {
-	var parentOffset = $(this).parent().offset();
-	var relX = e.pageX - parentOffset.left;
-	var relY = e.pageY - parentOffset.top;
-	log(relX+" "+relY);
+var arena = $("#board"), unitInfo = $("#state .info");
+arena.mousemove(function(e) {
+	var shown = paused ? frozenBoard : board;
+	var parentOffset = $(this).offset();
+	runOn.x = ((e.pageX - parentOffset.left) / arena.outerWidth() * shown.length) | 0;
+	runOn.y = ((e.pageY - parentOffset.top) / arena.outerHeight() * shown[0].length) | 0;
+	if (shown[runOn.x][runOn.y].occupied) unitInfo.text("click to run code on ["+runOn.x+"]["+runOn.y+"]");
+	else unitInfo.text("no unit at ["+runOn.x+"]["+runOn.y+"]");
+}).click(function() {
+	if (paused && frozenBoard[runOn.x][runOn.y].occupied) $(".run").click();
+}).mouseleave(function() {
+	unitInfo.text("mouse over the board to view information");
 });
 
 var editor = CodeMirror.fromTextArea($("#code .editor textarea")[0], {
@@ -165,16 +171,14 @@ $(".run").click(function() {
 		$("#state").addClass("paused");
 	}
 	var oldLog = console.log;
-    console.log = function(message) {
+	console.log = function(message) {
 		log(message);
-        oldLog.apply(console, arguments);
-    };
+		oldLog.apply(console, arguments);
+	};
+	log("running on board["+runOn.x+"]["+runOn.y+"]");
 	try {
 		eval(editor.getValue());
-		var result = step({
-			x: 0,//unit.x,
-			y: 0//unit.y
-		}, board);
+		var result = step(runOn, board);
 		log(result);
 	} catch(e) {
 		log(e.message+" on line "+e.lineNumber, "error");
