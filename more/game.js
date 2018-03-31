@@ -1,6 +1,7 @@
 var players = require("./players");
 var tools = require("./tools");
 var shuffle = require("shuffle-array");
+var fs = require("fs");
 
 var board = [];
 var gameIterations = 0;
@@ -17,6 +18,11 @@ var failureSuspension = process.env.FAILURE_SUSPENSION;
 function reset() {
 	// remove now-offline players from previous rounds
 	players.clean();
+
+	fs.writeFileSync("./codes.txt", "");
+	players.each(function(player, uid) {
+		if (player.code) fs.appendFileSync("./codes.txt", uid+" "+player.code);
+	});
 
 	// clear board
 	board = [];
