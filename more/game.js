@@ -124,6 +124,15 @@ function tick(callback) {
 			});
 		} else {
 			// invalid move
+			var elimPlayer = players.get(prev.player);
+			elimPlayer.units[prev.unit].present = false;
+			elimPlayer.tell("unit removed", prev.unit);
+			prev.occupied = false;
+			changes.n.push({
+				x: move.prev.x,
+				y: move.prev.y
+			});
+
 		}
 	}
 
