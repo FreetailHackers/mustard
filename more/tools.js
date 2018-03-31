@@ -1,3 +1,10 @@
+const {VM} = require("vm2");
+var vm = new VM({
+	timeout: 40, // ms
+	console: "redirect",
+	sandbox: {}
+});
+
 async function evaluateCode(board, player, index) {
 	var unit = player.units[index];
 	try {
@@ -12,7 +19,7 @@ async function evaluateCode(board, player, index) {
 			var timer = setTimeout(function() {
 				resolve({}); // should be reject
 			}, 50);
-			var result = player.vm.run(code);
+			var result = vm.run(code);
 			clearTimeout(timer);
 			resolve(result);
 		}));

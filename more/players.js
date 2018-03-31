@@ -1,7 +1,6 @@
 var game = require("./game");
 var fs = require("fs");
 var crypto = require("crypto");
-const {VM} = require("vm2");
 
 var codeTemplate = fs.readFileSync("./more/sandboxed.js", "utf8");
 var players = {};
@@ -19,8 +18,7 @@ function add(socket) {
 		units: [],
 		failures: 0,
 		playing: false,
-		connected: true,
-		vm: newVM()
+		connected: true
 	}
 	return uid;
 }
@@ -28,14 +26,6 @@ function add(socket) {
 function remove(uid) {
 	players[uid].playing = false;
 	players[uid].connected = false;
-}
-
-function newVM() {
-	return new VM({
-		timeout: 40, // ms
-		console: "redirect",
-		sandbox: {}
-	});
 }
 
 function clean() {
@@ -46,7 +36,6 @@ function clean() {
 
 function updateCode(uid, code) {
 	var player = get(uid);
-	player.vm = newVM();
 	player.code = code+"\n/**/\n"+codeTemplate; // combats against commenting out the rest
 	// in case there are suspensions, give another chance
 	if (player.failures > failureSuspension) player.failures--;
