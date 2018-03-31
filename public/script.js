@@ -165,9 +165,10 @@ $(".resume").click(function() {
 
 $(".run").click(function() {
 	if (!paused) {
-		frozenBoard = board;
+		frozenBoard = JSON.parse(JSON.stringify(board));
 		paused = true;
 		log("board frozen");
+		draw(frozenBoard);
 		$("#state").addClass("paused");
 	}
 	var oldLog = console.log;
@@ -175,11 +176,10 @@ $(".run").click(function() {
 		log(message);
 		oldLog.apply(console, arguments);
 	};
-	log("running on board["+runOn.x+"]["+runOn.y+"]");
 	try {
 		eval(editor.getValue());
 		var result = step(board, playerData, runOn);
-		log(result);
+		log("unit ["+runOn.x+"]["+runOn.y+"] would move to "+JSON.stringify(result, null, 2));
 	} catch(e) {
 		log(e.message+" on line "+e.lineNumber, "error");
 		doc.addLineClass(e.lineNumber, "background", "error");

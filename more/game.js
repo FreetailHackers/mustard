@@ -78,7 +78,7 @@ function tick(callback) {
 		var move = queue[i];
 		var player = players.get(move.player);
 		var unit = player.units[move.unit];
-		// if (!unit) continue;
+		if (!unit) continue;
 		var prev = board[move.prev.x][move.prev.y];
 		var next = board[move.next.x][move.next.y];
 		if (!next.occupied) {
@@ -138,28 +138,48 @@ function tick(callback) {
 		}
 	}
 
+	function run() {
+		new Promise(function(resolve) {
+			if (i % 10000 === 0) {
+				global.gc();
+				console.log(process.memoryUsage());
+			}
+			i++;
+			setImmediate(resolve);
+		}).then(run);
+	}
+
 	// calculate next round of moves
 	queue = [];
-	var tasks = [];
-	players.each(function(player) {
-		if (!player.playing) return;
-		for (var i = 0; i < player.units.length; i++) {
-			if (!player.units[i].present || !player.code || player.failures > failureSuspension) continue;
-			tasks.push(tools.evaluateCode(board, player, i).then(function(result) {
-				if (typeof result === "object") {
-					queue.push(result);
-				} else if (typeof result === "string" && result != "result moves outside of board") {
-					player.tell("execution error", result);
-					player.failures++;
-					if (player.failures >= failureSuspension) {
-						player.tell("code suspended");
-					}
-				}
-			}));
-		}
-	});
+	var completed = [], allofthem = [];
 
-	Promise.all(tasks).then(function() {
+	async function processPlayer() {
+		// I hate that I wrote this, that this is possible, and JS itself
+		var tasks = [], done = false;
+		players.each(function(player, uid) {
+			if (done || !player.playing || completed.indexOf(uid) > -1) return;
+			completed.push(uid);
+			done = true;
+			for (var i = 0; i < player.units.length; i++) {
+				if (!player.units[i].present || !player.code || player.failures > failureSuspension) continue;
+				tasks.push(tools.evaluateCode(board, player, i).then(function(result) {
+					if (typeof result === "object") {
+						queue.push(result);
+					} else if (typeof result === "string" && result != "result moves outside of board") {
+						player.tell("execution error", result);
+						player.failures++;
+						if (player.failures >= failureSuspension) {
+							player.tell("code suspended");
+						}
+					}
+				}));
+			}
+		});
+		if (done) await Promise.all(tasks).then(processPlayer);
+		else await Promise.all(tasks);
+	}
+
+	processPlayer().then(function() {
 		gameIterations++;
 		if (gameIterations >= process.env.GAME_ITERATIONS) {
 			reset();
