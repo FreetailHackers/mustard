@@ -39,12 +39,13 @@
 			<div class="blue"></div>
 		</div>
 		<div class="documentation">
-			Some documentation about how code can be used and stuff.
-			<h1>Documentation</h1>
+			<p>
 			You can find a <a href="https://medium.com/@shishirjessu/invaders-workshop-code-examples-a926f793cfd6">refresher of JavaScript here</a>.
 			Clicking "save" will submit your code to be run live against other contestants on the server.
 			Use "run locally" to run the code in your browser and debug. Running locally will freeze the board.
+			</p>
 			<h2>Board state</h2>
+			<p>
 			You can access information about a particular region of the board using <code>board[x][y]</code> which gives an object like the following:
 			<pre>{
 	"team": "blue",
@@ -54,11 +55,14 @@
 }</pre>
 			The team is the color that that tile is (which is used to calculate area). You can check if someone is currently on that location using occupied.
 			Player specifies the ID of the player and unit is a number unique to the player that identifies a particular unit.
+			</p>
 			<h2>Moving</h2>
+			<p>
 			Every round of the game, your <code>step</code> function is run as follows: <code>step(board, player, unit)</code> with the current state of the board,
 			your information (<code>player.id</code> and <code>player.team</code>), and the current position of that unit (<code>unit.x</code> and <code>unit.y</code>).
 			Your function should return the desired position to move to (one direction in any of the four ways) like <code>return { x: 1, y: 12}</code>.
 			Make sure not to run into units can't beat or run off the board! Blue beats green beats red beats blue.
+			</p>
 		</div>
 	</div>
 </main>
