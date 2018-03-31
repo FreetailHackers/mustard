@@ -3,7 +3,7 @@ var board, test = true;
 var canvas = document.getElementById("board");
 var ctx = canvas.getContext("2d");
 var s = 40;
-var uid;
+var uid, playerData;
 var colors = {
 	blue: "#2f52a7",
 	green: "#2f9fa7",
@@ -27,7 +27,7 @@ socket.on("connect", function() {
 }).on("code suspended", function(runtime) {
 	log("code has been suspended (too many errors)", "error");
 }).on("game restart", function(data) {
-	// console.log(data);
+	playerData = data;
 	uid = data.uid;
 	$(".coverage > div").removeClass("me");
 	$(".coverage ."+data.team).addClass("me");
@@ -178,7 +178,7 @@ $(".run").click(function() {
 	log("running on board["+runOn.x+"]["+runOn.y+"]");
 	try {
 		eval(editor.getValue());
-		var result = step(runOn, board);
+		var result = step(board, playerData, runOn);
 		log(result);
 	} catch(e) {
 		log(e.message+" on line "+e.lineNumber, "error");

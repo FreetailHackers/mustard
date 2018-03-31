@@ -10,12 +10,14 @@
 </header>
 <main>
 	<div id="code">
-		<div class="editor"><textarea id="" cols="30" rows="10">function step(player, board) {
-		return {
-			x: player.x + 1,
-			y: player.y + 1
-		};
-	}</textarea></div>
+		<div class="editor"><textarea id="" cols="30" rows="10">function step(board, player, unit) {
+  console.log("playing as "+player.uid+" on team "+player.team);
+  return {
+    x: unit.x + 1,
+    y: unit.y + 1
+  };
+}
+</textarea></div>
 		<div class="console">
 			<div class="resize"></div>
 			<div class="content"></div>

@@ -9,9 +9,13 @@ async function evaluateCode(board, player, index) {
 	var unit = player.units[index];
 	try {
 		var code = player.code.replace("PAYLOAD", JSON.stringify({
-			player: {
+			unit: {
 				x: unit.x,
 				y: unit.y
+			},
+			player: {
+				uid: player.uid,
+				team: player.team
 			},
 			board: board
 		}));
