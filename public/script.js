@@ -57,8 +57,8 @@ socket.on("connect", function() {
 });
 
 function draw(todraw) {
-	canvas.width = s*(todraw.length-1);
-	canvas.height = s*(todraw[0].length-1);
+	canvas.width = s*(todraw.length);
+	canvas.height = s*(todraw[0].length);
 
 	var scores = { red: 0, blue: 0, green: 0 }, totalUnits = 0;
 
