@@ -28,6 +28,7 @@ socket.on("connect", function() {
 	log("code has been suspended (too many errors)", "error");
 }).on("game restart", function(data) {
 	playerData = data;
+	if (uid != data.uid) log("connected as "+data.uid);
 	uid = data.uid;
 	$(".coverage > div").removeClass("me");
 	$(".coverage ."+data.team).addClass("me");
