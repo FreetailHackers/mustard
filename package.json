@@ -28,6 +28,9 @@
 	"devDependencies": {
 		"nodemon": "^1.17.1"
 	},
+	"engines": {
+		"node": "9.8.0"
+	},
 	"nodemonConfig": {
 		"ignore": [
 			"public/*"
